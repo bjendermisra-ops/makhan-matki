@@ -1,0 +1,14 @@
+'use strict';
+const guideKey='makhan-guide-100-v1';let guideStep=0,practiced=false;
+const guideSteps=[
+ ['Welcome to Vrindavan!','Goal simple hai: 3 matki collect karo, phir HOME 100 pahucho. Solo mein computer se race; friends mein phone pass karo.','pot'],
+ ['Roll & move','Dice jitna number de, utne steps chalo. Yahan practice roll karke dekho — match par asar nahi padega.','orange'],
+ ['Collect & choose','Golden stops se guzarte hi matki milti hai. Junction par matki trail ya shortcut chuno. Shortcut par is baar ki matki chhoot sakti hai.','pot'],
+ ['Your power cards','Roll se pehle ek card: Flute +2 moves, Feather +1 matki, Shield ek monkey ya slide se bachata hai. Feather ko yahan try karo.','feather'],
+ ['Ready for your leela?','Monkey par land hue toh 4 steps peeche! Slides neeche, peacock paths aage. 3 matki ke saath HOME cross karte hi jeet! Chat button se alag private room bana sakte ho.','shield']];
+function renderGuide(){practiced=false;const [title,text,asset]=guideSteps[guideStep];$('guideProgress').textContent='QUICK GUIDE · '+(guideStep+1)+' / '+guideSteps.length;$('guideTitle').textContent=title;$('guideText').textContent=text;$('guideArt').replaceChildren(art(asset));$('practice').replaceChildren();$('guideTry').hidden=![1,3].includes(guideStep);$('guideTry').disabled=false;$('guideTry').textContent=guideStep===1?'TRY A PRACTICE ROLL':'TRY FEATHER · +1 MATKI';$('guideNext').textContent=guideStep===4?'LET’S PLAY ▶':'NEXT →';if(guideStep===1){for(let i=0;i<6;i++){const c=document.createElement('span');c.textContent=i===0?'●':String(i+1);c.className='practice-cell'+(i===0?' selected':'');$('practice').append(c)}}if(guideStep===3)$('practice').textContent='Matkis: 0 / 3'}
+function openGuide(){guideStep=0;renderGuide();openDialog('guide')}
+function closeGuide(){try{localStorage.setItem(guideKey,'done')}catch{}closeDialog('guide')}
+function needsGuide(){try{return localStorage.getItem(guideKey)!=='done'}catch{return false}}
+$('guideTry').onclick=()=>{if(practiced)return;practiced=true;sound([523,659,784]);if(guideStep===1){[...$('practice').children].forEach((c,i)=>{c.textContent=i===3?'●':String(i+1);c.classList.toggle('selected',i===3)});$('guideTry').textContent='ROLLED 3 · MOVED 3 STEPS ✓'}else{$('practice').textContent='Matkis: 1 / 3 · Feather used!';$('guideTry').textContent='MATKI COLLECTED ✓'}$('guideTry').disabled=true};$('guideNext').onclick=()=>{if(guideStep===4)closeGuide();else{guideStep++;renderGuide()}};$('guideSkip').onclick=closeGuide;$('guide').addEventListener('cancel',()=>{try{localStorage.setItem(guideKey,'done')}catch{}});$('replayGuide').onclick=()=>{$('rules').close();openGuide()};window.addEventListener('makhan:new-match',()=>{if(needsGuide())openGuide()});if(needsGuide()&&!$('setup').open&&state.phase!=='won')openGuide();
+if('serviceWorker'in navigator){window.addEventListener('load',()=>navigator.serviceWorker.register('/play/sw.js',{scope:'/play/'}).catch(()=>{}))}

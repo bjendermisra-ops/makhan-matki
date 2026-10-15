@@ -1,0 +1,5 @@
+const CACHE='makhan-shell-v5';
+const FILES=['/play/index.html','/play/style.css?v=5','/play/engine.js?v=5','/play/game.js?v=5','/play/enhance.js?v=5','/play/chat.js?v=5','/play/premium.js?v=5','/play/online.js?v=5','/play/voice.js?v=5','/play/assets/vrindavan-night.webp','/play/assets/characters-items.webp'];
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(FILES)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith('makhan-shell-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
+self.addEventListener('fetch',event=>{const u=new URL(event.request.url);if(event.request.method!=='GET'||u.origin!==self.location.origin||!FILES.includes(u.pathname+u.search))return;event.respondWith(fetch(event.request).then(r=>{if(r.ok&&!r.redirected)caches.open(CACHE).then(c=>c.put(event.request,r.clone()));return r}).catch(()=>caches.match(event.request).then(r=>r||new Response('Offline asset unavailable.',{status:503}))))});
